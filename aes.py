@@ -76,20 +76,29 @@ Rcon = [0x8d, 0x01, 0x02, 0x04, 0x08, 0x10, 0x20, 0x40, 0x80, 0x1b, 0x36,
     0x9f, 0x25, 0x4a, 0x94, 0x33, 0x66, 0xcc, 0x83, 0x1d, 0x3a, 0x74,
     0xe8, 0xcb ]
 
-texto="La casa es chica"
 
 #Toma el texto claro, lo deja en una lista y lo convierte a int
 def textToMatrix(texto): 
       matriz=list(texto)
       for i in range(16):
             matriz[i]=ord(matriz[i])
-      print matriz
       return matriz
+
 
 def addRoundKey(estado,k):
       for i in range(16):
             estado[i]=estado[i]^k[i]
-      print estado
-      return estado
 
-addRoundKey(addRoundKey(textToMatrix(texto),textToMatrix("1234567890123456")),textToMatrix("1234567890123456"))
+
+def byteSub(estado):
+      for i in range(16):
+            estado[i]=sbox[estado[i]]
+
+
+
+texto="La casa es chica"
+estado=textToMatrix(texto)
+#addRoundKey(addRoundKey(textToMatrix(texto),textToMatrix("1234567890123456")),textToMatrix("1234567890123456"))
+
+byteSub(estado)
+print estado
