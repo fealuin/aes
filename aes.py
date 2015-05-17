@@ -51,54 +51,230 @@ rsbox = [0x52, 0x09, 0x6a, 0xd5, 0x30, 0x36, 0xa5, 0x38, 0xbf, 0x40, 0xa3,
     0x21, 0x0c, 0x7d]
 
 # Rijndael Rcon
-Rcon = [0x8d, 0x01, 0x02, 0x04, 0x08, 0x10, 0x20, 0x40, 0x80, 0x1b, 0x36,
-    0x6c, 0xd8, 0xab, 0x4d, 0x9a, 0x2f, 0x5e, 0xbc, 0x63, 0xc6, 0x97,
-    0x35, 0x6a, 0xd4, 0xb3, 0x7d, 0xfa, 0xef, 0xc5, 0x91, 0x39, 0x72,
-    0xe4, 0xd3, 0xbd, 0x61, 0xc2, 0x9f, 0x25, 0x4a, 0x94, 0x33, 0x66,
-    0xcc, 0x83, 0x1d, 0x3a, 0x74, 0xe8, 0xcb, 0x8d, 0x01, 0x02, 0x04,
-    0x08, 0x10, 0x20, 0x40, 0x80, 0x1b, 0x36, 0x6c, 0xd8, 0xab, 0x4d,
-    0x9a, 0x2f, 0x5e, 0xbc, 0x63, 0xc6, 0x97, 0x35, 0x6a, 0xd4, 0xb3,
-    0x7d, 0xfa, 0xef, 0xc5, 0x91, 0x39, 0x72, 0xe4, 0xd3, 0xbd, 0x61,
-    0xc2, 0x9f, 0x25, 0x4a, 0x94, 0x33, 0x66, 0xcc, 0x83, 0x1d, 0x3a,
-    0x74, 0xe8, 0xcb, 0x8d, 0x01, 0x02, 0x04, 0x08, 0x10, 0x20, 0x40,
-    0x80, 0x1b, 0x36, 0x6c, 0xd8, 0xab, 0x4d, 0x9a, 0x2f, 0x5e, 0xbc,
-    0x63, 0xc6, 0x97, 0x35, 0x6a, 0xd4, 0xb3, 0x7d, 0xfa, 0xef, 0xc5,
-    0x91, 0x39, 0x72, 0xe4, 0xd3, 0xbd, 0x61, 0xc2, 0x9f, 0x25, 0x4a,
-    0x94, 0x33, 0x66, 0xcc, 0x83, 0x1d, 0x3a, 0x74, 0xe8, 0xcb, 0x8d,
-    0x01, 0x02, 0x04, 0x08, 0x10, 0x20, 0x40, 0x80, 0x1b, 0x36, 0x6c,
-    0xd8, 0xab, 0x4d, 0x9a, 0x2f, 0x5e, 0xbc, 0x63, 0xc6, 0x97, 0x35,
-    0x6a, 0xd4, 0xb3, 0x7d, 0xfa, 0xef, 0xc5, 0x91, 0x39, 0x72, 0xe4,
-    0xd3, 0xbd, 0x61, 0xc2, 0x9f, 0x25, 0x4a, 0x94, 0x33, 0x66, 0xcc,
-    0x83, 0x1d, 0x3a, 0x74, 0xe8, 0xcb, 0x8d, 0x01, 0x02, 0x04, 0x08,
-    0x10, 0x20, 0x40, 0x80, 0x1b, 0x36, 0x6c, 0xd8, 0xab, 0x4d, 0x9a,
-    0x2f, 0x5e, 0xbc, 0x63, 0xc6, 0x97, 0x35, 0x6a, 0xd4, 0xb3, 0x7d,
-    0xfa, 0xef, 0xc5, 0x91, 0x39, 0x72, 0xe4, 0xd3, 0xbd, 0x61, 0xc2,
-    0x9f, 0x25, 0x4a, 0x94, 0x33, 0x66, 0xcc, 0x83, 0x1d, 0x3a, 0x74,
-    0xe8, 0xcb ]
+Rcon = [
+      [0x01,0,0,0],
+      [0x02,0,0,0],
+      [0x04,0,0,0],
+      [0x08,0,0,0],
+      [0x10,0,0,0],
+      [0x20,0,0,0],
+      [0x40,0,0,0],
+      [0x80,0,0,0],
+      [0x1b,0,0,0],
+      [0x36,0,0,0],
+      ]
 
+
+mix=[
+      [2,3,1,1],
+      [1,2,3,1],
+      [1,1,2,3],
+      [3,1,1,2]
+      ]
+imix=[
+      [14,11,13,9],
+      [9,14,11,13],
+      [13,9,14,11],
+      [11,13,9,14]
+      ]
+import string
+
+def imprimeMatrizHex(matriz):
+      for filas in matriz:
+            print "\n"
+            for columnas in filas:
+                  print "%02x"%columnas,
+      print "\n"
 
 #Toma el texto claro, lo deja en una lista y lo convierte a int
-def textToMatrix(texto): 
-      matriz=list(texto)
+def textoAEstado(texto): 
+      matriz=[range(4) for i in range(4)]
       for i in range(16):
-            matriz[i]=ord(matriz[i])
+            matriz[i%4][i/4]=ord(texto[i])
       return matriz
 
+def estadoAtexto(estado): 
+      texto=""
+      for i in range(4):
+            for j in xrange(4):
+                  texto+=chr(estado[j][i])
+      return texto
+
+
+def textToClave(texto): 
+      matriz=[range(4) for i in range(4)]
+      for i in range(16):
+            matriz[i/4][i%4]=ord(texto[i])
+      return matriz
 
 def addRoundKey(estado,k):
-      for i in range(16):
-            estado[i]=estado[i]^k[i]
+      for i in range(4):
+            for j in range(4):
+                  estado[i][j]=estado[i][j]^k[i][j]
+      return estado
 
 
-def byteSub(estado):
-      for i in range(16):
-            estado[i]=sbox[estado[i]]
+def byteSub(estado,matriz):
+      for i in range(4):
+            for j in range(4):
+                  estado[i][j]=matriz[estado[i][j]]
+      return estado
 
+def shiftRows(estado):
+      for i in range(4):
+            estado[i]=estado[i][i:]+estado[i][:i]
+      return estado
+
+def invShiftRows(estado):
+      for i in range(4):
+            estado[i]=estado[i][-i:]+estado[i][:-i]
+      return estado
+
+#Para multGalois se utilizo el siguiente algoritmo, disponible en http://samiam.org/galois.html
+#Take two eight-bit numbers, a and b, and an eight-bit product p
+#Set the product to zero.
+#Make a copy of a and b, which we will simply call a and b in the rest of this algorithm
+#Run the following loop eight times:
+#If the low bit of b is set, exclusive or the product p by the value of a
+#Keep track of whether the high (eighth from left) bit of a is set to one
+#Rotate a one bit to the left, discarding the high bit, and making the low bit have a value of zero
+#If a's hi bit had a value of one prior to this rotation, exclusive or a with the hexadecimal number 0x1b
+#Rotate b one bit to the right, discarding the low bit, and making the high (eighth from left) bit have a value of zero.
+#The product p now has the product of a and b
+
+def multGalois(x,y):
+      p=0
+      a=x
+      b=y
+      for i in range(8):
+            if b&0b00000001: #Si b tiene el bit menos significativo = 1 a XOR p
+                  p=p^a
+            hia=a&0b10000000 #Guardamos el bit mas significativo de a antes de rotar a
+            
+            a=a<<1
+            a%256 #Se eliminan bits > 8
+            if hia==0b10000000:
+                  a=a^0x1b
+            b=b>>1
+      return p%256
+
+
+
+def mixColumn(columna,matriz):
+      aux=[0,0,0,0]
+      for i in range(4):
+            for j in range(4):
+                  mult=multGalois(matriz[i][j],columna[j])
+                  aux[i]^=mult
+      return aux
+
+def mixColumns(estado,matriz):
+      aux=[0,0,0,0]
+      for i in range(4):
+            for j in range(4):
+                  aux[j]=estado[j][i]
+            aux=mixColumn(aux,matriz)
+            for k in range(4):
+                  estado[k][i]=aux[k]
+      return estado
+
+def subByte(fila):
+      for i in range(4):
+            fila[i]=sbox[fila[i]]
+      return fila
+
+def rotByte(fila):
+      fila=fila[1:]+fila[:1]
+      return fila
+
+def xorFila(fila,n):
+      for i in range(4):
+            fila[i]=fila[i]^n
+      return fila
+
+def xorFilaFila(fila1,fila2):
+      aux=[]
+      for i in range(4):
+            aux.append(fila1[i]^fila2[i])
+      return aux
+
+def expandeClave(k):
+      clave=textToClave(k)
+      #print "Expandiendo clave",k
+      
+      for i in range(4,44):
+            aux=clave[i-1]
+            if(i%4==0):
+                  aux=xorFilaFila(subByte(rotByte(aux)),Rcon[i%4])
+            clave.append(xorFilaFila(clave[i-4],aux))
+      #imprimeMatrizHex(clave)
+      return clave
+
+def seleccionaClave(k,ronda):
+      print "Seleccionando RoundKey",ronda
+      subclave=k[ronda*4:ronda*4+4]
+      imprimeMatrizHex (subclave)
+      return subclave
+
+def rondaAes(estado,k):
+      byteSub(estado,sbox)
+      shiftRows(estado)
+      mixColumns(estado,mix)
+      addRoundKey(estado,k)
+
+
+def encriptarAes(texto,k):
+      #ronda inicial
+      estado=textoAEstado(texto)
+      clave=expandeClave(k)
+      addRoundKey(estado,seleccionaClave(clave,0))
+      for i in range(1,10):
+            rondaAes(estado, seleccionaClave(clave,i))
+      #Ronda final
+      byteSub(estado,sbox)
+      shiftRows(estado)
+      addRoundKey(estado,seleccionaClave(clave,10))
+      return estadoAtexto(estado)
+
+def rondaAesInv(estado,k):
+      addRoundKey(estado,k)
+      mixColumns(estado,imix)
+      invShiftRows(estado)
+      byteSub(estado,rsbox)
+
+def desencriptarAes(texto,k):
+      estado=textoAEstado(texto)
+      clave=expandeClave(k)
+      #Ronda Inicial
+      addRoundKey(estado,seleccionaClave(clave,10))
+      print "Antes de shift rows",estado
+      invShiftRows(estado)
+      print "Despues de shift rows",estado
+      byteSub(estado,rsbox)
+      for i in range(9,0,-1):
+            rondaAesInv(estado,seleccionaClave(clave,i))
+      addRoundKey(estado,seleccionaClave(clave,0))
+      return estadoAtexto(estado)
 
 
 texto="La casa es chica"
-estado=textToMatrix(texto)
-#addRoundKey(addRoundKey(textToMatrix(texto),textToMatrix("1234567890123456")),textToMatrix("1234567890123456"))
+estado=textoAEstado(texto)
+print estadoAtexto(estado)
+imprimeMatrizHex(estado)
+print "texto encriptado:" + encriptarAes("La casa es chica","Eres Informatico")
+a=encriptarAes("La casa es chica","Eres Informatico")
+print "casi desencriptado: "+desencriptarAes(a,"Eres Informatico")
+#imprimeMatrizHex(encriptarAes("La casa es chica","Eres Informatico"))
+#imprimeMatrizHex( expandeClave("Eres Informatico"))
 
-byteSub(estado)
-print estado
+#addRoundKey(addRoundKey(textoAEstado(texto),textoAEstado("1234567890123456")),textoAEstado("1234567890123456"))
+#shiftRows(estado)
+#byteSub(estado)
+#print estado
+#print bin(multGalois(2,0xd4))
+#columna=[estado[i][0] for i in range(4)]
+#columna=mixColumns(estado,mix)
+#imprimeMatrizHex(estado)
+
+#for x in range(4):
+#     print hex(columna[x]) 
