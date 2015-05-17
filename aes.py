@@ -1,4 +1,6 @@
-# Rijndael S-box
+##MATRICES
+
+# caja de sustitucion
 sbox =  [0x63, 0x7c, 0x77, 0x7b, 0xf2, 0x6b, 0x6f, 0xc5, 0x30, 0x01, 0x67,
     0x2b, 0xfe, 0xd7, 0xab, 0x76, 0xca, 0x82, 0xc9, 0x7d, 0xfa, 0x59,
     0x47, 0xf0, 0xad, 0xd4, 0xa2, 0xaf, 0x9c, 0xa4, 0x72, 0xc0, 0xb7,
@@ -24,7 +26,7 @@ sbox =  [0x63, 0x7c, 0x77, 0x7b, 0xf2, 0x6b, 0x6f, 0xc5, 0x30, 0x01, 0x67,
     0x89, 0x0d, 0xbf, 0xe6, 0x42, 0x68, 0x41, 0x99, 0x2d, 0x0f, 0xb0,
     0x54, 0xbb, 0x16]
 
-# Rijndael Inverted S-box
+# caja de sustirucion inversa
 rsbox = [0x52, 0x09, 0x6a, 0xd5, 0x30, 0x36, 0xa5, 0x38, 0xbf, 0x40, 0xa3,
     0x9e, 0x81, 0xf3, 0xd7, 0xfb , 0x7c, 0xe3, 0x39, 0x82, 0x9b, 0x2f,
     0xff, 0x87, 0x34, 0x8e, 0x43, 0x44, 0xc4, 0xde, 0xe9, 0xcb , 0x54,
@@ -50,7 +52,7 @@ rsbox = [0x52, 0x09, 0x6a, 0xd5, 0x30, 0x36, 0xa5, 0x38, 0xbf, 0x40, 0xa3,
     0x04, 0x7e, 0xba, 0x77, 0xd6, 0x26, 0xe1, 0x69, 0x14, 0x63, 0x55,
     0x21, 0x0c, 0x7d]
 
-# Rijndael Rcon
+# tabla rcon
 Rcon = [
       [0x01,0,0,0],
       [0x02,0,0,0],
@@ -64,13 +66,14 @@ Rcon = [
       [0x36,0,0,0],
       ]
 
-
+#Matriz mix columns
 mix=[
       [2,3,1,1],
       [1,2,3,1],
       [1,1,2,3],
       [3,1,1,2]
       ]
+#Matriz mix columns inversa
 imix=[
       [14,11,13,9],
       [9,14,11,13],
@@ -79,6 +82,8 @@ imix=[
       ]
 import string
 
+##OPERACIONES BASICAS
+#Imprime matriz en formato hexadecimal
 def imprimeMatrizHex(matriz):
       for filas in matriz:
             print "\n"
@@ -86,13 +91,13 @@ def imprimeMatrizHex(matriz):
                   print "%02x"%columnas,
       print "\n"
 
-#Toma el texto claro, lo deja en una lista y lo convierte a int
+#Toma el texto claro, lo deja en una matriz por columnas convirtiendo cada caracter a int
 def textoAEstado(texto): 
       matriz=[range(4) for i in range(4)]
       for i in range(16):
             matriz[i%4][i/4]=ord(texto[i])
       return matriz
-
+#Toma una matriz de estado y la lleva a texto por columnas
 def estadoAtexto(estado): 
       texto=""
       for i in range(4):
@@ -100,31 +105,33 @@ def estadoAtexto(estado):
                   texto+=chr(estado[j][i])
       return texto
 
-
+#Toma clave y la lleva a una matriz por filas (orden ppt vista en clases)
 def textToClave(texto): 
       matriz=[range(4) for i in range(4)]
       for i in range(16):
             matriz[i/4][i%4]=ord(texto[i])
       return matriz
 
+##OPERACIONES AES
+#Hace un XOR entre la matriz de estado y una clave
 def addRoundKey(estado,k):
       for i in range(4):
             for j in range(4):
                   estado[i][j]=estado[i][j]^k[i][j]
       return estado
 
-
+#Substituye elementos de estado en matriz de substitucion
 def byteSub(estado,matriz):
       for i in range(4):
             for j in range(4):
                   estado[i][j]=matriz[estado[i][j]]
       return estado
-
+#Rota filas de la columna estado 0,1,2,3 a la izquierda
 def shiftRows(estado):
       for i in range(4):
             estado[i]=estado[i][i:]+estado[i][:i]
       return estado
-
+#Rota filas de la columna estado 0,1,2,3 a la derecha
 def invShiftRows(estado):
       for i in range(4):
             estado[i]=estado[i][-i:]+estado[i][:-i]
@@ -159,7 +166,7 @@ def multGalois(x,y):
       return p%256
 
 
-
+#Opera multiplica una matriz por el vector columna en un espacio finito
 def mixColumn(columna,matriz):
       aux=[0,0,0,0]
       for i in range(4):
@@ -167,7 +174,7 @@ def mixColumn(columna,matriz):
                   mult=multGalois(matriz[i][j],columna[j])
                   aux[i]^=mult
       return aux
-
+#multiplica todas las columnas del estado con matriz
 def mixColumns(estado,matriz):
       aux=[0,0,0,0]
       for i in range(4):
@@ -178,26 +185,23 @@ def mixColumns(estado,matriz):
                   estado[k][i]=aux[k]
       return estado
 
+##OPERACIONES DE CLAVE
+# reemplaza elementos de un vector en caja de sustitucion sbox
 def subByte(fila):
       for i in range(4):
             fila[i]=sbox[fila[i]]
       return fila
-
+#Rota vector 1 a la izquierda
 def rotByte(fila):
       fila=fila[1:]+fila[:1]
       return fila
-
-def xorFila(fila,n):
-      for i in range(4):
-            fila[i]=fila[i]^n
-      return fila
-
+#hace un XOR con los elementos de dos vectore
 def xorFilaFila(fila1,fila2):
       aux=[]
       for i in range(4):
             aux.append(fila1[i]^fila2[i])
       return aux
-
+#expande clave
 def expandeClave(k):
       clave=textToClave(k)
       #print "Expandiendo clave",k
@@ -209,20 +213,22 @@ def expandeClave(k):
             clave.append(xorFilaFila(clave[i-4],aux))
       #imprimeMatrizHex(clave)
       return clave
-
+#busca en la clave expandida la clave que corresponde a cada ronda
 def seleccionaClave(k,ronda):
-      print "Seleccionando RoundKey",ronda
+      #print "Seleccionando RoundKey",ronda
       subclave=k[ronda*4:ronda*4+4]
-      imprimeMatrizHex (subclave)
+      #imprimeMatrizHex (subclave)
       return subclave
 
+##ENCRIPTACION
+#Ronda encriptacion
 def rondaAes(estado,k):
       byteSub(estado,sbox)
       shiftRows(estado)
       mixColumns(estado,mix)
       addRoundKey(estado,k)
 
-
+#Encriptacion AES
 def encriptarAes(texto,k):
       #ronda inicial
       estado=textoAEstado(texto)
@@ -236,20 +242,23 @@ def encriptarAes(texto,k):
       addRoundKey(estado,seleccionaClave(clave,10))
       return estadoAtexto(estado)
 
+#DESENCRIPTACION
+#Ronda desencriptacion
 def rondaAesInv(estado,k):
       addRoundKey(estado,k)
       mixColumns(estado,imix)
       invShiftRows(estado)
       byteSub(estado,rsbox)
 
+#Desencriptacion
 def desencriptarAes(texto,k):
       estado=textoAEstado(texto)
       clave=expandeClave(k)
       #Ronda Inicial
       addRoundKey(estado,seleccionaClave(clave,10))
-      print "Antes de shift rows",estado
+      #print "Antes de shift rows",estado
       invShiftRows(estado)
-      print "Despues de shift rows",estado
+      #print "Despues de shift rows",estado
       byteSub(estado,rsbox)
       for i in range(9,0,-1):
             rondaAesInv(estado,seleccionaClave(clave,i))
@@ -257,13 +266,13 @@ def desencriptarAes(texto,k):
       return estadoAtexto(estado)
 
 
-texto="La casa es chica"
-estado=textoAEstado(texto)
-print estadoAtexto(estado)
-imprimeMatrizHex(estado)
-print "texto encriptado:" + encriptarAes("La casa es chica","Eres Informatico")
-a=encriptarAes("La casa es chica","Eres Informatico")
-print "casi desencriptado: "+desencriptarAes(a,"Eres Informatico")
+#texto="La casa es chica"
+#estado=textoAEstado(texto)
+#print estadoAtexto(estado)
+#imprimeMatrizHex(estado)
+#print "texto encriptado:" + encriptarAes("La casa es chica","Eres Informatico")
+#a=encriptarAes("La casa es chica","Eres Informatico")
+#print "casi desencriptado: "+desencriptarAes(a,"Eres Informatico")
 #imprimeMatrizHex(encriptarAes("La casa es chica","Eres Informatico"))
 #imprimeMatrizHex( expandeClave("Eres Informatico"))
 
