@@ -5,7 +5,7 @@ import log
 
 sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
-server_address = (('localhost', 8888))
+server_address = (('', 8888))
 print 'Iniciando servidor %s en puerto %s' % server_address
 sock.bind(server_address)
 sock.listen(1)
