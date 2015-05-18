@@ -81,15 +81,20 @@ imix=[
       [11,13,9,14]
       ]
 import string
+import log
 
 ##OPERACIONES BASICAS
 #Imprime matriz en formato hexadecimal
 def imprimeMatrizHex(matriz):
+      a=''
       for filas in matriz:
-            print "\n"
+            a=a+ "\n"
             for columnas in filas:
-                  print "%02x"%columnas,
-      print "\n"
+                  a=a+"%02x"%columnas + " "
+            for columnas in filas:
+                  a=a+" "+chr(columnas)+" "
+      a= a+"\n"
+      log.tolog(a)
 
 #Toma el texto claro, lo deja en una matriz por columnas convirtiendo cada caracter a int
 def textoAEstado(texto): 
@@ -115,26 +120,45 @@ def textToClave(texto):
 ##OPERACIONES AES
 #Hace un XOR entre la matriz de estado y una clave
 def addRoundKey(estado,k):
+      log.tolog("\nAddRoundKey:\n")
+      log.tolog("\nEstado:\n")
+      imprimeMatrizHex(estado)
+      log.tolog("\nClave:\n")
+      imprimeMatrizHex(k)
       for i in range(4):
             for j in range(4):
                   estado[i][j]=estado[i][j]^k[i][j]
+      log.tolog("\nResultado:\n")
+      imprimeMatrizHex(estado)
       return estado
 
 #Substituye elementos de estado en matriz de substitucion
 def byteSub(estado,matriz):
+      log.tolog("\nByteSub Estado Inicial:\n")
+      imprimeMatrizHex(estado)
       for i in range(4):
             for j in range(4):
                   estado[i][j]=matriz[estado[i][j]]
+      log.tolog("\nResultado:\n")
+      imprimeMatrizHex(estado)
       return estado
 #Rota filas de la columna estado 0,1,2,3 a la izquierda
 def shiftRows(estado):
+      log.tolog("\nShiftRows Estado Inicial:\n")
+      imprimeMatrizHex(estado)
       for i in range(4):
             estado[i]=estado[i][i:]+estado[i][:i]
+      log.tolog("\nResultado:\n")
+      imprimeMatrizHex(estado)
       return estado
 #Rota filas de la columna estado 0,1,2,3 a la derecha
 def invShiftRows(estado):
+      log.tolog("\nShiftRows Inverso Estado Inicial:\n")
+      imprimeMatrizHex(estado)
       for i in range(4):
             estado[i]=estado[i][-i:]+estado[i][:-i]
+      log.tolog("\nResultado:\n")
+      imprimeMatrizHex(estado)
       return estado
 
 #Para multGalois se utilizo el siguiente algoritmo, disponible en http://samiam.org/galois.html
@@ -176,6 +200,10 @@ def mixColumn(columna,matriz):
       return aux
 #multiplica todas las columnas del estado con matriz
 def mixColumns(estado,matriz):
+      log.tolog("\nMixColumns Estado Inicial:\n")
+      imprimeMatrizHex(estado)
+      log.tolog("\nMatriz utilizada:\n")
+      imprimeMatrizHex(matriz)
       aux=[0,0,0,0]
       for i in range(4):
             for j in range(4):
@@ -183,6 +211,8 @@ def mixColumns(estado,matriz):
             aux=mixColumn(aux,matriz)
             for k in range(4):
                   estado[k][i]=aux[k]
+      log.tolog("\nResultado:\n")
+      imprimeMatrizHex(estado)
       return estado
 
 ##OPERACIONES DE CLAVE
@@ -204,13 +234,16 @@ def xorFilaFila(fila1,fila2):
 #expande clave
 def expandeClave(k):
       clave=textToClave(k)
-      #print "Expandiendo clave",k
-      
+      log.tolog("\nExpandiendo clave: %s\n"%k)
+      log.tolog("\nMatrix inicial:")
+      imprimeMatrizHex(clave)
       for i in range(4,44):
             aux=clave[i-1]
             if(i%4==0):
                   aux=xorFilaFila(subByte(rotByte(aux)),Rcon[i%4])
             clave.append(xorFilaFila(clave[i-4],aux))
+      log.tolog("\nResultado:")
+      imprimeMatrizHex(clave)
       return clave
 #busca en la clave expandida la clave que corresponde a cada ronda
 def seleccionaClave(k,ronda):
@@ -230,17 +263,25 @@ def rondaAes(estado,k):
 
 #Encriptacion AES
 def encriptarAes(texto,k):
+      log.tolog("INICIANDO ENCRIPTACION AES DEL TEXTO \"%s\", Clave \"%s\""% (texto,k))
       #ronda inicial
       estado=textoAEstado(texto)
       clave=expandeClave(k)
-      
+      log.tolog("\nRONDA INICIAL\nEstado inicial:\n")
+      imprimeMatrizHex(estado)
+      log.tolog("Clave inicial:\n")
+      imprimeMatrizHex(seleccionaClave(clave,0))
       addRoundKey(estado,seleccionaClave(clave,0))
       for i in range(1,10):
+            log.tolog("\nRONDA %d\n Clave de la ronda:"%i)
+            imprimeMatrizHex(seleccionaClave(clave,i))
             rondaAes(estado, seleccionaClave(clave,i))
       #Ronda final
+      log.tolog("\nRonda Final:\n")
       byteSub(estado,sbox)
       shiftRows(estado)
       addRoundKey(estado,seleccionaClave(clave,10))
+      log.tolog("\nResultado Encriptacion: %s"%estadoAtexto(estado))
       return estadoAtexto(estado)
 
 ##DESENCRIPTACION
@@ -253,17 +294,26 @@ def rondaAesInv(estado,k):
 
 #Desencriptacion
 def desencriptarAes(texto,k):
+      log.tolog("INICIANDO DESENCRIPTACION AES DEL TEXTO \"%s\", Clave \"%s\""% (texto,k))
       estado=textoAEstado(texto)
       clave=expandeClave(k)
       #Ronda Inicial
+      log.tolog("\nRONDA INICIAL\nEstado inicial:\n")
+      imprimeMatrizHex(estado)
+      log.tolog("Clave inicial:\n")
+      imprimeMatrizHex(seleccionaClave(clave,0))
+      
       addRoundKey(estado,seleccionaClave(clave,10))
-      #print "Antes de shift rows",estado
+      
       invShiftRows(estado)
-      #print "Despues de shift rows",estado
+      
       byteSub(estado,rsbox)
       for i in range(9,0,-1):
+            log.tolog("\nRONDA %d\n Clave de la ronda:"%i)
+            imprimeMatrizHex(seleccionaClave(clave,i))
             rondaAesInv(estado,seleccionaClave(clave,i))
       addRoundKey(estado,seleccionaClave(clave,0))
+      log.tolog("\nResultado Desencriptacion: %s"%estadoAtexto(estado))
       return estadoAtexto(estado)
 
 
