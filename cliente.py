@@ -10,7 +10,7 @@ try:
 except:
     print("host no encontrado")
     exit()
-    print("Se ha establecido conexion con el servidor, para salir ingrese un mensaje vacio")
+print("Se ha establecido conexion con el servidor, para salir ingrese un mensaje vacio")
 while(True):
     msg=raw_input("Escriba su mensaje:\n")
     if len(msg)%2: msg=msg+' '
