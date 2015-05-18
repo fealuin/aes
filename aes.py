@@ -211,7 +211,6 @@ def expandeClave(k):
             if(i%4==0):
                   aux=xorFilaFila(subByte(rotByte(aux)),Rcon[i%4])
             clave.append(xorFilaFila(clave[i-4],aux))
-      #imprimeMatrizHex(clave)
       return clave
 #busca en la clave expandida la clave que corresponde a cada ronda
 def seleccionaClave(k,ronda):
@@ -227,12 +226,14 @@ def rondaAes(estado,k):
       shiftRows(estado)
       mixColumns(estado,mix)
       addRoundKey(estado,k)
+      
 
 #Encriptacion AES
 def encriptarAes(texto,k):
       #ronda inicial
       estado=textoAEstado(texto)
       clave=expandeClave(k)
+      
       addRoundKey(estado,seleccionaClave(clave,0))
       for i in range(1,10):
             rondaAes(estado, seleccionaClave(clave,i))
@@ -242,7 +243,7 @@ def encriptarAes(texto,k):
       addRoundKey(estado,seleccionaClave(clave,10))
       return estadoAtexto(estado)
 
-#DESENCRIPTACION
+##DESENCRIPTACION
 #Ronda desencriptacion
 def rondaAesInv(estado,k):
       addRoundKey(estado,k)
@@ -266,24 +267,3 @@ def desencriptarAes(texto,k):
       return estadoAtexto(estado)
 
 
-#texto="La casa es chica"
-#estado=textoAEstado(texto)
-#print estadoAtexto(estado)
-#imprimeMatrizHex(estado)
-#print "texto encriptado:" + encriptarAes("La casa es chica","Eres Informatico")
-#a=encriptarAes("La casa es chica","Eres Informatico")
-#print "casi desencriptado: "+desencriptarAes(a,"Eres Informatico")
-#imprimeMatrizHex(encriptarAes("La casa es chica","Eres Informatico"))
-#imprimeMatrizHex( expandeClave("Eres Informatico"))
-
-#addRoundKey(addRoundKey(textoAEstado(texto),textoAEstado("1234567890123456")),textoAEstado("1234567890123456"))
-#shiftRows(estado)
-#byteSub(estado)
-#print estado
-#print bin(multGalois(2,0xd4))
-#columna=[estado[i][0] for i in range(4)]
-#columna=mixColumns(estado,mix)
-#imprimeMatrizHex(estado)
-
-#for x in range(4):
-#     print hex(columna[x]) 
