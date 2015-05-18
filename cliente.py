@@ -1,13 +1,14 @@
 import socket
 import sys
 
-
+sock= socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+sock.connect(('localhost',8888))
 
 while(True):
-	sock= socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-	sock.connect(('localhost',8888))
 
-	msg=raw_input("Escriba su mensaje")
-	if msg:
-		sock.sendall(msg)
-	sock.close()
+
+	msg=raw_input("Escriba su mensaje:\n")
+	
+	sock.sendall(msg)
+
+sock.close()

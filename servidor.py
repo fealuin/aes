@@ -12,17 +12,12 @@ while True:
     print >>sys.stderr, 'Esperando por una coneccion'
     connection, client_address = sock.accept()
 
-    try:
-        print >>sys.stderr, 'connection from', client_address
 
-        # Receive the data in small chunks and retransmit it
-        while True:
-            data = connection.recv(16)
-            
-            if data:
-                print >>sys.stderr, 'received "%s"' % data
- 
-            
-    finally:
-        # Clean up the connection
-        connection.close()
+    while True:
+        data = connection.recv(1024)
+        
+        if data:
+            print >>sys.stderr, 'received "%s"' % data
+        
+
+connection.close()
